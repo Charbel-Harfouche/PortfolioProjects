@@ -34,6 +34,16 @@ where continent is null and Total_deaths is not null and location not in
 on b.location=codata.location and b.mdate=codata.date
 order by population desc
 
+-- Now using CTE
+With Latest_TotalDeaths_By_Continents (location, Mdate) as
+(
+select location, Max(date) from CovidDataCVS 
+where continent is null and Total_deaths is not null and location not in ('lower middle income', 'low income', 'European Union', 'Upper middle income', 'High income')
+group by location
+)
+select codata.location, population, Total_deaths, (total_deaths/population)*100 as MortalityRate  from CovidDataCVS as codata
+join Latest_TotalDeaths_By_Continents on Latest_TotalDeaths_By_Continents.location=codata.location and Latest_TotalDeaths_By_Continents.mdate=codata.date
+order by population desc
 
 -- Global Infection rate by continent
 Select codata.location, population, total_cases, (total_cases/population)*100 as InfectionRate from CovidDataCVS as codata
@@ -103,6 +113,22 @@ join (select location, Max(date) as Mdate from CovidDataCVS where continent is n
 ('lower middle income', 'low income', 'European Union', 'Upper middle income', 'High income') group by location) as b
 on b.location = codata.location and b.Mdate=codata.date
 order by population desc
+
+-- Now using Temp table
+Drop table if exists #latest_PeopleFullyVaccinated_By_Continent
+Create table #latest_PeopleFullyVaccinated_By_Continent (
+location nvarchar(50),
+Mdate date)
+Insert into #latest_PeopleFullyVaccinated_By_Continent Select location, Max(date) as Mdate from CovidDataCVS where continent is null and people_fully_vaccinated is not null and location not in
+('lower middle income', 'low income', 'European Union', 'Upper middle income', 'High income')
+group by location
+Select * from #latest_PeopleFullyVaccinated_By_Continent
+
+select codata.location, population, total_vaccinations, people_fully_vaccinated, (people_fully_vaccinated/population)*100 as VaccinationRate from CovidDataCVS as codata
+join #latest_PeopleFullyVaccinated_By_Continent
+on #latest_PeopleFullyVaccinated_By_Continent.location = codata.location and #latest_PeopleFullyVaccinated_By_Continent.Mdate=codata.date
+order by population desc
+
 
 
 -- What is the vaccination rate by country
