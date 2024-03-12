@@ -80,8 +80,6 @@ order by date desc
 
 
 -- What is Canada's ranking in infection rate?
--- location, latest date with infection rate, infection rate
--- join table1(location , max(date) where columns not null group by location) to table2(location, date, infection rate)
 select codata.location, date, population,total_cases, (codata.total_cases/codata.population)*100 as InfectionRate from CovidDataCVS as codata
 join (select location, max(date) as Mdate from Coviddatacvs where continent is not null and total_cases is not null group by location ) as b 
 on codata.location = b.location and codata.date = b.mdate
