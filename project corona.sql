@@ -1,6 +1,6 @@
 --Project for coronavirus in Canada
 --Data gathered from https://ourworldindata.org/covid-deaths
---data imported from a .cvs file to a single large table
+
 
 
 
@@ -63,9 +63,6 @@ order by date desc
 
 
 -- How does Canada's mortality rate rank compared to other countries
--- in order to have an aggregate function such as max(date) with 2 other columns, we will have to join 2 tables, one that has the 3 initial columns
--- without any aggregate function, and then another table that has the aggregate function and the grouped by column. We then join them based on
--- the grouped by column and the column with the aggregate function. 
 select codata.location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 as MortalityRate from CovidDataCVS as codata
 join (select location, max(date) Mdate from coviddatacvs where total_deaths is not null and total_cases is not null and continent is not null group by location) as b
 on codata.location = b.location and codata.date=b.mdate
